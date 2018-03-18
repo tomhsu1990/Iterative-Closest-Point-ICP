@@ -14,12 +14,12 @@ cv::Point2d ICPHelper::findClosestPt (cv::Point2d pt, std::vector<cv::Point2d> r
 	return ret;
 }
 
-void ICPHelper::icpIter (std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt, ANNHelper &ann) {
+void ICPHelper::icpIter (std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt, ANNHelper *ann) {
 	// find closest point
 	std::vector<cv::Point2d> closestPt;
 	for (unsigned i=0;i<src.size();++i){
 		//closestPt.push_back(findClosestPt(src[i], tgt));
-		closestPt.push_back(ann.findClosestPt(src[i]));
+		closestPt.push_back(ann->findClosestPt(src[i]));
 	}
 	
 	// initialization

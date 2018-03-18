@@ -12,3 +12,10 @@ cv::Point2d ANNHelper::findClosestPt(cv::Point2d pt){
 		eps);							// error bound
 	return cv::Point2d(data_pts[nn_idx[0]][0], data_pts[nn_idx[0]][1]);
 }
+
+void ANNHelper::initializeKdTree () {
+	kd_tree = new ANNkd_tree(			// build search structure
+				data_pts,				// the data points
+				n_pts,					// number of points
+				dim);					// dimension of space
+}
