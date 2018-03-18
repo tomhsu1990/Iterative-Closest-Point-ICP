@@ -151,10 +151,11 @@ double icp (cv::Point2d trans, double &rotates,
 			// 	dists,							// distance (returned)
 			// 	eps);							// error bound
 
-			error += sqrt(pow(tmp_tgt[i].x - tgt[i].x, 2) + 
-						  pow(tmp_tgt[i].y - tgt[i].y, 2));
+			// if we didn't have one-to-one mapping ...
+			//error += sqrt(pow(tmp_tgt[i].x - tgt[i].x, 2) + 
+			//			  pow(tmp_tgt[i].y - tgt[i].y, 2));
 		}
-		error = error/(double)tgt.size();
+		//error = error/(double)tgt.size();
 
 		trans += helper.t;
 		rotates += helper.r;
@@ -169,7 +170,7 @@ double icp (cv::Point2d trans, double &rotates,
 				img.at<cv::Vec3b>(tmp_tgt[i]) = magenta;
 		cv::imshow("ICP demo", img);
 		cv::waitKey(30);
-	} while (fabs(error - pre_err) > 1e-6 && iter_count < 1000);
+	} while (/*fabs(error - pre_err) > ann.eps && */iter_count < 1000);
 
 	return error;
 }
