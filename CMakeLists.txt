@@ -39,6 +39,14 @@ INCLUDE_DIRECTORIES(${OpenCV_INCLUDE_DIRS})
 #LINK_DIRECTORIES(${OPENNI2_DIR}/Redist/)
 #LINK_LIBRARIES(${OPENNI2_DIR}/Redist)
 
+#############################
+# ANN #######################
+#############################
+SET(ANN_DIR ${CMAKE_CURRENT_SOURCE_DIR}/ann_1.1.2)
+INCLUDE_DIRECTORIES(${ANN_DIR}/include)
+LINK_DIRECTORIES(${ANN_DIR}/lib)
+LINK_LIBRARIES(${ANN_DIR}/lib)
+
 #current files
 INCLUDE_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR} ${CMAKE_CURRENT_BINARY_DIR})
 
@@ -58,6 +66,7 @@ opencv_imgproc
 opencv_features2d
 opencv_flann
 opencv_core
+ANN
 #${OPENNI2_DIR}/Redist/libOpenNI2.so
 #${QT_QTMAIN_LIBRARY}
 #${QT_LIBRARIES}

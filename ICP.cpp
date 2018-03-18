@@ -7,6 +7,8 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "ANN/ANN.h"
+
 #include "RandomGenerator.hpp"
 #include "ICPHelper.hpp"
 
@@ -16,7 +18,7 @@ double icp (cv::Point2d trans, double &rotates, std::vector<cv::Point2d> &src, s
 
 int main (int argc, char *argv[]) {
 
-	std::string filename("../img/curve.png");
+	std::string filename("../img/smile.png");
 	int noise_add(0), noise_remove(0);
 	cv::Vec3d red(0,0,255), green(0,255,0), black(0,0,0), white(255, 255, 255);
 
@@ -41,6 +43,7 @@ int main (int argc, char *argv[]) {
 			}
 			img.at<cv::Vec3b>(cv::Point(c, r)) = white;
 		}
+	fprintf(stderr, "#pt %ld\n", src.size());
 	center = center / (double)src.size();
 	RandomGenerator random_gen(img.cols, img.rows);
 	// move points to (dx, dy, dth)
@@ -61,6 +64,29 @@ int main (int argc, char *argv[]) {
 			tgt.push_back(random_gen.getRandomPoint());
 	}
 
+	int dim(2), k(1);
+	double eps(0);
+	ANNpointArray		dataPts;				// data points
+	ANNpoint			queryPt;				// query point
+	ANNidxArray			nnIdx;					// near neighbor indices
+	ANNdistArray		dists;					// near neighbor distances
+	ANNkd_tree*			kdTree;					// search structure
+
+	queryPt = annAllocPt(dim);					// allocate query point
+	dataPts = annAllocPts(tgt.size(), dim);		// allocate data points
+	nnIdx = new ANNidx[k];						// allocate near neigh indices
+	dists = new ANNdist[k];						// allocate near neighbor dists
+
+	for (unsigned i=0;i<tgt.size();++i){
+		dataPts[i][0] = tgt[i].x;
+		dataPts[i][1] = tgt[i].y;
+	}
+
+	kdTree = new ANNkd_tree(					// build search structure
+					dataPts,					// the data points
+					tgt.size(),					// number of points
+					dim);						// dimension of space
+
 	for (unsigned i=0;i<src.size();++i)
 		img.at<cv::Vec3b>(src[i]) = red;
 	for (unsigned i=0;i<tgt.size();++i) {
@@ -73,11 +99,11 @@ int main (int argc, char *argv[]) {
 	cv::imshow("ICP demo", img);
 	cv::waitKey(0);
 
-	// do ICP
 	cv::Point2d trans(0,0);
 	double rotates(0);
 	cv::Mat ori_img;
 	img.copyTo(ori_img);
+	// do ICP
 	icp(trans, rotates, src, tgt, img, ori_img);
 	cv::imshow("ICP demo", img);
 	cv::waitKey(0);
