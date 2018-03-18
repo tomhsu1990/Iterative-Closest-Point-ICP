@@ -54,6 +54,8 @@ ADD_EXECUTABLE(ICP
 ICP.cpp
 ICPHelper.hpp
 ICPHelper.cpp
+ANNHelper.hpp
+ANNHelper.cpp
 RandomGenerator.hpp
 RandomGenerator.cpp
 )

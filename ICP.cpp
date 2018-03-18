@@ -7,18 +7,21 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
-#include "ANN/ANN.h"
+#include "ANNHelper.hpp"
 
 #include "RandomGenerator.hpp"
 #include "ICPHelper.hpp"
 
 void movePts (std::vector<cv::Point2d> &pt, cv::Point2d dd);
 void rotatePts (std::vector<cv::Point2d> &pt, double dth);
-double icp (cv::Point2d trans, double &rotates, std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt, cv::Mat &img, cv::Mat ori_img);
+double icp (cv::Point2d trans, double &rotates, 
+	std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt,
+	cv::Mat &img, cv::Mat ori_img,
+	ANNHelper &ann);
 
 int main (int argc, char *argv[]) {
 
-	std::string filename("../img/smile.png");
+	std::string filename("../img/curve.png");
 	int noise_add(0), noise_remove(0);
 	cv::Vec3d red(0,0,255), green(0,255,0), black(0,0,0), white(255, 255, 255);
 
@@ -64,28 +67,15 @@ int main (int argc, char *argv[]) {
 			tgt.push_back(random_gen.getRandomPoint());
 	}
 
-	int dim(2), k(1);
-	double eps(0);
-	ANNpointArray		dataPts;				// data points
-	ANNpoint			queryPt;				// query point
-	ANNidxArray			nnIdx;					// near neighbor indices
-	ANNdistArray		dists;					// near neighbor distances
-	ANNkd_tree*			kdTree;					// search structure
-
-	queryPt = annAllocPt(dim);					// allocate query point
-	dataPts = annAllocPts(tgt.size(), dim);		// allocate data points
-	nnIdx = new ANNidx[k];						// allocate near neigh indices
-	dists = new ANNdist[k];						// allocate near neighbor dists
-
+	ANNHelper ann(2, 1, 0, tgt.size());
 	for (unsigned i=0;i<tgt.size();++i){
-		dataPts[i][0] = tgt[i].x;
-		dataPts[i][1] = tgt[i].y;
+		ann.data_pts[i][0] = tgt[i].x;
+		ann.data_pts[i][1] = tgt[i].y;
 	}
-
-	kdTree = new ANNkd_tree(					// build search structure
-					dataPts,					// the data points
-					tgt.size(),					// number of points
-					dim);						// dimension of space
+	ann.kd_tree = new ANNkd_tree(					// build search structure
+					  ann.data_pts,					// the data points
+					  tgt.size(),					// number of points
+					  ann.dim);						// dimension of space
 
 	for (unsigned i=0;i<src.size();++i)
 		img.at<cv::Vec3b>(src[i]) = red;
@@ -104,7 +94,7 @@ int main (int argc, char *argv[]) {
 	cv::Mat ori_img;
 	img.copyTo(ori_img);
 	// do ICP
-	icp(trans, rotates, src, tgt, img, ori_img);
+	icp(trans, rotates, src, tgt, img, ori_img, ann);
 	cv::imshow("ICP demo", img);
 	cv::waitKey(0);
 
@@ -128,7 +118,8 @@ void rotatePts (std::vector<cv::Point2d> &pt, double dth) {
 
 double icp (cv::Point2d trans, double &rotates, 
 	std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt,
-	cv::Mat &img, cv::Mat ori_img) {
+	cv::Mat &img, cv::Mat ori_img,
+	ANNHelper &ann) {
 	cv::Vec3d magenta(255,0,255);
 	// how to deal with different size of src and tgt
 	std::vector<cv::Point2d> tmp_tgt;
@@ -141,7 +132,7 @@ double icp (cv::Point2d trans, double &rotates,
 	cv::Point2d tmp(0,0), t(0,0);
 	do {
 		iter_count++;
-		helper.icpIter(tmp_tgt, tgt);
+		helper.icpIter(tmp_tgt, tgt, ann);
 		
 		pre_err = error;
 		error = 0;
@@ -150,8 +141,18 @@ double icp (cv::Point2d trans, double &rotates,
 			tmp.y = (tmp_tgt[i].x*sin(helper.r)) + (tmp_tgt[i].y*cos(helper.r)) + helper.t.y;
 			tmp_tgt[i] = tmp;
 
-			// find closest point to compute the error distance
-			error += sqrt(pow(tmp_tgt[i].x - tgt[i].x, 2) + pow(tmp_tgt[i].y - tgt[i].y, 2));
+			// query_pt[0] = tmp.x;
+			// query_pt[1] = tmp.y;
+			// // find closest point to compute the error distance
+			// kd_tree->annkSearch(				// search
+			// 	query_pt,						// query point
+			// 	k,								// number of near neighbors
+			// 	nn_idx,							// nearest neighbors (returned)
+			// 	dists,							// distance (returned)
+			// 	eps);							// error bound
+
+			error += sqrt(pow(tmp_tgt[i].x - tgt[i].x, 2) + 
+						  pow(tmp_tgt[i].y - tgt[i].y, 2));
 		}
 		error = error/(double)tgt.size();
 

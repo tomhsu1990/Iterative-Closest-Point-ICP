@@ -7,13 +7,15 @@
 #include <opencv2/core/core.hpp>
 #include <opencv2/highgui/highgui.hpp>
 
+#include "ANNHelper.hpp"
+
 class ICPHelper {
 public:
 	ICPHelper (){}
 	~ICPHelper (){}
 
 	cv::Point2d findClosestPt (cv::Point2d pt, std::vector<cv::Point2d> ref);
-	void icpIter (std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt);
+	void icpIter (std::vector<cv::Point2d> &src, std::vector<cv::Point2d> &tgt, ANNHelper &ann);
 
 	cv::Point2d t, mean_closest, mean_src;
 	double r;
