@@ -170,8 +170,8 @@ double icp (cv::Point2d &trans, double &rotates,
 
 	ICPHelper helper;
 	int iter_count(0);
-	double error(0), pre_err(0), r(0);
-	cv::Point2d tmp(0,0), t(0,0);
+	double error(0), pre_err(0);
+	cv::Point2d tmp(0,0);
 	do {
 		iter_count++;
 		helper.icpIter(tmp_tgt, tgt, ann);
@@ -187,11 +187,11 @@ double icp (cv::Point2d &trans, double &rotates,
 			cv::Point2d closestPt = ann->findClosestPt(tmp);
 
 			// if we didn't have one-to-one mapping ...
-			error += sqrt(pow(tmp_tgt[i].x - closestPt.x, 2) + 
-						  pow(tmp_tgt[i].y - closestPt.y, 2));
+			error += pow(tmp_tgt[i].x - closestPt.x, 2) + 
+					 pow(tmp_tgt[i].y - closestPt.y, 2);
 		}
-		error = error/(double)tgt.size();
-
+		error = error/(double)tmp_tgt.size();
+		
 		trans += helper.t;
 		rotates += helper.r;
 

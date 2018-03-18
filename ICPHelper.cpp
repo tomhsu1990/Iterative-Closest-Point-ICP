@@ -49,8 +49,6 @@ void ICPHelper::icpIter (std::vector<cv::Point2d> &src, std::vector<cv::Point2d>
 }
 
 void ICPHelper::initialization (std::vector<cv::Point2d> &closestPt, std::vector<cv::Point2d> &src) {
-	t = cv::Point2d(0,0);
-	r = 0;
 	mean_closest = getMean(closestPt);
 	mean_src = getMean(src);
 }
