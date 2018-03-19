@@ -71,13 +71,15 @@ make
 
 ## Question
 
-1. How do we speed up the performance by doing down-sampling?
+1. How do we extend 2D ICP into 3D ICP? Is there a way to compute 3D rotation? RANSAC+SVD?
 
-2. Is there another way to solve local minima problem?
+2. How do we speed up the performance by doing down-sampling?
 
-3. Is is reasonable to set the error difference as 1e-6?
+3. Is there another way to solve local minima problem?
 
-4. Could we use fewer iterations as a termination condition?
+4. Is is reasonable to set the error difference as 1e-6?
+
+5. Could we use fewer iterations as a termination condition?
 
 ## Reference
 
