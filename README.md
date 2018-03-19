@@ -1,26 +1,19 @@
 # Iterative Closest Point (ICP)
 
-The main concept of 2D ICP is to find the closest point for each source point. In addition, the key is that after determining the closest points' coorespondences, how do we calculate the rotation. Here is the big picture and peusdo code.
+The main concept of 2D ICP is to find the closest point for each source point. In addition, the key is that after determining the closest points' coorespondences, how do we calculate the rotation. Below is the big picture and peusdo code of computing the rotation part.
 
-We have two points set: source points set and closest points set.
+We have two points set: closest points set and source points set.<br>
+After centering at each mean, every point lives in its own coordinate.<br>
+Suppose the rotation we want to compute is r.<br>
+Let r = r_closest - r_src.<br>
+r_closest is the shifted closest points' coordinate relative to the global coordinate.<br>
+r_src is the shifted source points' coordinate relative to the global coordinate.<br>
+The formula below is an approximation to r.<br>
+r = atan2(y'/x') - atan2(y/x), (x, y) is the source coordinate and (x', y') is the closest points' coordinate.<br>
+app(r) = (atan2(y'/x') - atan2(y/x))/(1+yy'/xx')<br>
+app(r) is proportional to r and up to scale by 0.5 to 1.0.<br>
 
-After centering at each mean, every point lives in its own coordinate.
-
-Suppose the rotation we want to compute is r.
-
-Let r = r_closest - r_src.
-
-r_closest is the shifted closest points' coordinate relative to the global coordinate.
-
-r_src is the shifted source points' coordinate relative to the global coordinate.
-
-The formula below is an approximation to r.
-
-r = atan2(y'/x') - atan2(y/x), (x, y) is the source coordinate and (x', y') is the closest points' coordinate.
-
-app(r) = (atan2(y'/x') - atan2(y/x))/(1+yy'/xx')
-
-app(r) is proportional to r.
+Another big problem is the local minima. The way I deal with local minima is by generating multiple rotation hypothesis at local minima and doing ICP again to find the minimum error.
 
 ## Algorithm
 
