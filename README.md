@@ -15,13 +15,23 @@ app(r) is proportional to r and up to scale by 0.5 to 1.0.<br>
 
 Another big problem is the local minima. The way I deal with local minima is by generating multiple rotation hypothesis at local minima and doing ICP again to find the minimum error.
 
-## Algorithm
+Here is the demonstration video: [2D Iterative Closest Point]().
 
-[Approximate Nearest Neighbors](https://www.cs.umd.edu/~mount/ANN/)
+## Algorithm of the ICP Module
+
+1. Get the closest points' coorespondences via [Approximate Nearest Neighbors (ANN)](https://www.cs.umd.edu/~mount/ANN/).
+
+2. Compute delta translation and rotation.
+
+3. Find the error
 
 ## Discussion
 
+To show the 
+
 ## How to run (MacOS)
+
+* Please make sure you have installed OpenCV and ANN library.
 
 mkdir build
 
@@ -48,6 +58,10 @@ make
 1. How do we speed up the performance by doing down-sampling?
 
 2. Is there another way to solve local minima problem?
+
+3. Is is reasonable to set the error difference as 1e-6?
+
+4. Could we use fewer iterations as a termination condition?
 
 ## Reference
 
