@@ -15,7 +15,7 @@ public:
 		this->eps = eps;
 		this->n_pts = size;
 		query_pt = annAllocPt(dim);
-		data_pts = annAllocPts(size, dim);	// allocate data points
+		data_pts = annAllocPts(n_pts, dim);	// allocate data points
 		nn_idx = new ANNidx[k];				// allocate near neigh indices
 		dists = new ANNdist[k];				// allocate near neighbor dists
 	}

@@ -17,14 +17,14 @@ void rotatePts (std::vector<cv::Point2d> &pt, double dth);
 double icp (cv::Point2d &trans, double &rotates, 
 	std::vector<cv::Point2d> &tmp_tgt, std::vector<cv::Point2d> &tgt,
 	cv::Mat &img, cv::Mat ori_img,
-	ANNHelper *ann, cv::Vec3d clr);
+	ICPHelper helper, ANNHelper *ann, cv::Vec3d clr);
 
 int main (int argc, char *argv[]) {
 
 	std::string filename("../img/curve.png");
 	int noise_add(0), noise_remove(0);
 	cv::Vec3d red(0,0,255), green(0,255,0), blue(255,0,0), black(0,0,0), white(255, 255, 255);
-	cv::Vec3d magenta(255,0,255), yellow(0,255,255);
+	cv::Vec3d magenta(255,0,255), yellow(0,255,255), cyan(255,255,0);
 
 	if (argc >= 2) filename = argv[1];
 	if (argc >= 3) noise_add = atoi(argv[2]);
@@ -33,8 +33,8 @@ int main (int argc, char *argv[]) {
 	cv::Mat img = cv::imread(filename.c_str(), CV_LOAD_IMAGE_COLOR);
 	cv::imshow("ICP demo", img);
 	cv::waitKey(0);
-
-	cv::Point2d center(0, 0);
+	
+	ICPHelper helper;
 	std::vector<cv::Point2d> src, tgt;
 	for (unsigned r=0;r<img.rows;++r)
 		for (unsigned c=0;c<img.cols;++c) {
@@ -42,15 +42,13 @@ int main (int argc, char *argv[]) {
 			if (clr[0] < white[0] && clr[1] < white[1] && clr[2] < white[2]) {
 				src.push_back(cv::Point2d(c, r));
 				tgt.push_back(cv::Point2d(c, r));
-				center.x += c;
-				center.y += r;
 			}
 			img.at<cv::Vec3b>(cv::Point(c, r)) = white;
 		}
 	fprintf(stderr, "#pt %ld\n", src.size());
-	center = center / (double)src.size();
+	cv::Point2d center = helper.getMean(tgt);
 	RandomGenerator random_gen(img.cols, img.rows);
-	// move points to (dx, dy, dth)
+	// move points to (trans_ref, rotates_ref)
 	cv::Point2d trans_ref(random_gen.getRandomPoint());
 	double rotates_ref(random_gen.getRandomPoint(360));
 	movePts(tgt, -center);
@@ -94,24 +92,21 @@ int main (int argc, char *argv[]) {
 	cv::Mat ori_img;
 	img.copyTo(ori_img);
 	// do ICP
-	// how to deal with different size of src and tgt
 	std::vector<cv::Point2d> tmp_tgt;
 	for (unsigned i=0;i<src.size();++i)
 		tmp_tgt.push_back(src[i]);
-	double error = icp(trans, rotates, tmp_tgt, tgt, img, ori_img, ann, magenta);
-
+	double error = icp(trans, rotates, tmp_tgt, tgt, img, ori_img, helper, ann, magenta);
+	trans = helper.getMean(tmp_tgt)-center;
 	fprintf(stderr, "translation(%.2lf, %.2lf), rotate(%.2lf deg)\n", trans.x, trans.y, rotates*360.0f/M_PI);
 	fprintf(stderr, "referrence translation(%.2lf, %.2lf), rotate(%.2lf deg)\n", trans_ref.x, trans_ref.y, rotates_ref);
+
 	cv::imshow("ICP demo", img);
 	cv::waitKey(0);
 	img.copyTo(ori_img);
 
-	// move, rotate (360 deg or 360/n), and move back
+	// move to the coordinate's center, rotate (360 deg or 360/n), and move back
 	// do icp again to compare with the current error
-	center = cv::Point2d(0,0);
-	for (unsigned i=0;i<tmp_tgt.size();++i)
-		center += tmp_tgt[i];
-	center = center / (double)tmp_tgt.size();
+	center += trans;
 	std::vector<cv::Point2d> final_tmp_tgt;
 	cv::Point2d final_trans(0,0);
 	double final_rotates(0);
@@ -124,7 +119,7 @@ int main (int argc, char *argv[]) {
 		cv::Point2d tmp_trans(0,0);
 		double tmp_rotates(0);
 		ori_img.copyTo(img);
-		double tmp_error = icp(tmp_trans, tmp_rotates, cp_tmp_tgt, tgt, img, ori_img, ann, yellow);
+		double tmp_error = icp(tmp_trans, tmp_rotates, cp_tmp_tgt, tgt, img, ori_img, helper, ann, yellow);
 		if (error > tmp_error) {
 			error = tmp_error;
 			final_trans = trans+tmp_trans;
@@ -133,11 +128,12 @@ int main (int argc, char *argv[]) {
 		}
 	}
 	ori_img.copyTo(img);
-	for (unsigned i=0;i<final_tmp_tgt.size();++i)
+	for (unsigned i=0;i<final_tmp_tgt.size();++i){
 		if (final_tmp_tgt[i].x >= 0 && final_tmp_tgt[i].x < img.cols && 
 			final_tmp_tgt[i].y >= 0 && final_tmp_tgt[i].y < img.rows)
 			img.at<cv::Vec3b>(final_tmp_tgt[i]) = blue;
-
+	}
+	final_trans = helper.getMean(final_tmp_tgt)-helper.getMean(src);
 	fprintf(stderr, "final translation(%.2lf, %.2lf), rotate(%.2lf deg)\n", final_trans.x, final_trans.y, final_rotates*360.0f/M_PI);
 	fprintf(stderr, "referrence translation(%.2lf, %.2lf), rotate(%.2lf deg)\n", trans_ref.x, trans_ref.y, rotates_ref);
 	cv::imshow("ICP demo", img);
@@ -166,9 +162,8 @@ void rotatePts (std::vector<cv::Point2d> &pt, double dth) {
 double icp (cv::Point2d &trans, double &rotates, 
 	std::vector<cv::Point2d> &tmp_tgt, std::vector<cv::Point2d> &tgt,
 	cv::Mat &img, cv::Mat ori_img,
-	ANNHelper *ann, cv::Vec3d clr) {
+	ICPHelper helper, ANNHelper *ann, cv::Vec3d clr) {
 
-	ICPHelper helper;
 	int iter_count(0);
 	double error(0), pre_err(0);
 	cv::Point2d tmp(0,0);
@@ -186,25 +181,23 @@ double icp (cv::Point2d &trans, double &rotates,
 			// find closest point to compute the error distance
 			cv::Point2d closestPt = ann->findClosestPt(tmp);
 
-			// if we didn't have one-to-one mapping ...
+			// we don't need one-to-one mapping!
 			error += pow(tmp_tgt[i].x - closestPt.x, 2) + 
 					 pow(tmp_tgt[i].y - closestPt.y, 2);
 		}
 		error = error/(double)tmp_tgt.size();
-		
+
 		trans += helper.t;
 		rotates += helper.r;
-
-		fprintf(stderr, "iter[%d]: err = %lf, translation(%.2lf, %.2lf), rotate(%.2lf deg)\n", 
-			iter_count, error, trans.x, trans.y, rotates*360.0f/M_PI);
 
 		ori_img.copyTo(img);
 		for (unsigned i=0;i<tmp_tgt.size();++i)
 			if (tmp_tgt[i].x >= 0 && tmp_tgt[i].x < img.cols && 
 				tmp_tgt[i].y >= 0 && tmp_tgt[i].y < img.rows)
 				img.at<cv::Vec3b>(tmp_tgt[i]) = clr;
+
 		cv::imshow("ICP demo", img);
-		cv::waitKey(30);
+		cv::waitKey(5);
 	} while (fabs(error - pre_err) > 1e-6 && iter_count < 1000);
 
 	return error;
