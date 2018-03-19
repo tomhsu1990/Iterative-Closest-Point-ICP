@@ -1,6 +1,6 @@
 # Iterative Closest Point (ICP)
 
-The main concept of 2D ICP is to find the closest point for each source point. In addition, the key is that after determining the closest points' coorespondences, how do we calculate the rotation. Below is the big picture and peusdo code of computing the rotation part.
+The main concept of 2D ICP is to find the closest point for each source point. In addition, the key is that after determining the closest points' coorespondences, how do we calculate the rotation. Below is the big picture of computing the rotation part.
 
 We have two points set: closest points set and source points set.<br>
 After centering at each mean, every point lives in its own coordinate.<br>
