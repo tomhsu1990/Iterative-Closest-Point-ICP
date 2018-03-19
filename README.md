@@ -15,7 +15,7 @@ app(r) is proportional to r and up to scale by 0.5 to 1.0.<br>
 
 Another big problem is the local minima. The way I deal with local minima is by generating multiple rotation hypothesis at local minima and doing ICP again to find the minimum error.
 
-Here is the demonstration video: [2D Iterative Closest Point]().
+Here is the demonstration video: [2D Iterative Closest Point](https://youtu.be/m64E47uvPYc).
 
 ## Algorithm of the ICP Module
 
