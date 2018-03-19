@@ -23,11 +23,27 @@ Here is the demonstration video: [2D Iterative Closest Point]().
 
 2. Compute delta translation and rotation.
 
-3. Find the error
+3. Calculate the error function based on the transformed points set and their cooresponding closest points set.
+
+4. Suppose we reach a local minima.
+
+5. Generate rotation hypothesis and repeat steps 1 to 3.
 
 ## Discussion
 
-To show the 
+To show the peroformace and accuracy, I randomly generat a pair of translation and rotation to move current points set to a target position.
+
+In the video, red points set is the source points set and green points set is the target points set.
+
+During the process, magenta points set is the local minima.
+
+Yellow points set is the rotation hypothesis. (This part can be parallelized.)
+
+Blue points set is our find result.
+
+Meanwhile, in the terminal, you can see the tranlation and rotation result when reaching local minima.
+
+At the end, you can see the final translation and rotation and the original randomly generated translation and rotation.
 
 ## How to run (MacOS)
 
