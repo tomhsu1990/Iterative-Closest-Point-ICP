@@ -24,7 +24,7 @@ app(r) is proportional to r.
 
 ## Algorithm
 
-[Approximate Nearest Neighbors] (https://www.cs.umd.edu/~mount/ANN/)
+[Approximate Nearest Neighbors](https://www.cs.umd.edu/~mount/ANN/)
 
 ## Discussion
 
@@ -58,4 +58,4 @@ make
 
 ## Reference
 
-[ICP（Iterative Closest Point）演算法實作 (C 語言)] (http://ivory-cavern.blogspot.com/2009/11/icp-iterative-closest-point-c.html)
+[ICP（Iterative Closest Point）演算法實作 (C 語言)](http://ivory-cavern.blogspot.com/2009/11/icp-iterative-closest-point-c.html)
