@@ -74,12 +74,14 @@ make
 1. How do we extend 2D ICP into 3D ICP? Is there a way to compute 3D rotation? RANSAC+SVD?
 
 2. How do we speed up the performance by doing down-sampling?
+    We can try uniform sampling first to realize down-sampling. If we try to keep the shape information when doing down-sampling, we need to have more samples agound the shape features such as corners.
 
 3. Is there another way to solve local minima problem?
 
 4. Is is reasonable to set the error difference as 1e-6?
 
 5. Could we use fewer iterations as a termination condition?
+    When the error difference is small, we can deduct the termintation iteration. In other words, an adaptive iteration bound can be used to improve this issue.
 
 ## Reference
 
